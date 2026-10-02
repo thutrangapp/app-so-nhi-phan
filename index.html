@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Máy tính số nhị phân</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --primary: #6c5ce7;
+      --primary-dark: #5545d0;
+      --bg: #f5f6fb;
+      --card: #ffffff;
+      --text: #202124;
+      --muted: #73778a;
+      --border: #e7e8f0;
+      --success: #159957;
+      --danger: #d93025;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 18px 14px 32px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 8px 4px 18px;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 10px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #7c6cf0, #5a4bd6);
+      color: white;
+      font-size: 25px;
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(108, 92, 231, .25);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(25px, 7vw, 34px);
+      line-height: 1.15;
+      letter-spacing: -.5px;
+    }
+
+    .subtitle {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .tab {
+      min-height: 52px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+      color: #505469;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 6px;
+      cursor: pointer;
+      transition: .15s ease;
+    }
+
+    .tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 6px 16px rgba(108, 92, 231, .22);
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 8px 25px rgba(30, 35, 70, .06);
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .label {
+      display: block;
+      margin: 2px 0 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #4e5265;
+    }
+
+    input {
+      width: 100%;
+      min-height: 56px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      outline: none;
+      background: #fafaff;
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 600;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      transition: .15s ease;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(108, 92, 231, .10);
+    }
+
+    .hint {
+      margin: 8px 1px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .operator {
+      display: grid;
+      place-items: center;
+      height: 42px;
+      color: var(--primary);
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    button.action {
+      min-height: 52px;
+      border: 0;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 6px 15px rgba(108, 92, 231, .20);
+    }
+
+    button.action:active, .tab:active {
+      transform: scale(.98);
+    }
+
+    button.secondary {
+      background: #f0efff;
+      color: var(--primary-dark);
+      box-shadow: none;
+    }
+
+    .result {
+      margin-top: 16px;
+      border-radius: 15px;
+      padding: 14px;
+      background: #f7f7fc;
+      border: 1px solid var(--border);
+    }
+
+    .result-title {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .result-value {
+      min-height: 30px;
+      word-break: break-all;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: clamp(21px, 6vw, 29px);
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .error {
+      display: none;
+      margin-top: 10px;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .history {
+      margin-top: 14px;
+    }
+
+    .history-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .history-title {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .clear {
+      border: 0;
+      background: transparent;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 13px;
+      padding: 7px;
+      cursor: pointer;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .history-item {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-family: inherit;
+      text-align: center;
+      padding: 12px;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 18px;
+    }
+
+    @media (min-width: 560px) {
+      .app { padding-top: 28px; }
+      .tabs { grid-template-columns: repeat(4, 1fr); }
+      .tab { min-height: 56px; }
+    }
+
+    @media (max-width: 360px) {
+      .app { padding-left: 10px; padding-right: 10px; }
+      .panel { padding: 14px; }
+      .tab { font-size: 12px; }
+      input { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="logo">01</div>
+      <h1>Máy tính số nhị phân</h1>
+      <p class="subtitle">Chuyển đổi và thực hiện phép tính với số nhị phân</p>
+    </header>
+
+    <nav class="tabs" aria-label="Chức năng">
+      <button class="tab active" data-tab="bin-dec">Nhị phân → 10</button>
+      <button class="tab" data-tab="dec-bin">10 → Nhị phân</button>
+      <button class="tab" data-tab="add">Cộng</button>
+      <button class="tab" data-tab="multiply">Nhân</button>
+    </nav>
+
+    <section class="panel">
+      <div class="section active" id="bin-dec">
+        <label class="label" for="binInput">Số nhị phân</label>
+        <input id="binInput" inputmode="numeric" autocomplete="off" placeholder="Ví dụ: 101101">
+        <div class="hint">Chỉ nhập các chữ số 0 và 1.</div>
+        <div class="actions">
+          <button class="action" onclick="convertBinToDec()">Chuyển đổi</button>
+          <button class="action secondary" onclick="clearSection('binInput','binResult','binError')">Xóa</button>
+        </div>
+        <div class="error" id="binError"></div>
+        <div class="result">
+          <div class="result-title">Kết quả thập phân</div>
+          <div class="result-value" id="binResult">—</div>
+        </div>
+      </div>
+
+      <div class="section" id="dec-bin">
+        <label class="label" for="decInput">Số thập phân</label>
+        <input id="decInput" inputmode="numeric" autocomplete="off" placeholder="Ví dụ: 45">
+        <div class="hint">Nhập số nguyên không âm.</div>
+        <div class="actions">
+          <button class="action" onclick="convertDecToBin()">Chuyển đổi</button>
+          <button class="action secondary" onclick="clearSection('decInput','decResult','decError')">Xóa</button>
+        </div>
+        <div class="error" id="decError"></div>
+        <div class="result">
+          <div class="result-title">Kết quả nhị phân</div>
+          <div class="result-value" id="decResult">—</div>
+        </div>
+      </div>
+
+      <div class="section" id="add">
+        <label class="label" for="addA">Số nhị phân thứ nhất</label>
+        <input id="addA" inputmode="numeric" autocomplete="off" placeholder="1010">
+        <div class="operator">+</div>
+        <label class="label" for="addB">Số nhị phân thứ hai</label>
+        <input id="addB" inputmode="numeric" autocomplete="off" placeholder="1101">
+        <div class="actions">
+          <button class="action" onclick="calculate('add')">Tính tổng</button>
+          <button class="action secondary" onclick="clearCalc('add')">Xóa</button>
+        </div>
+        <div class="error" id="addError"></div>
+        <div class="result">
+          <div class="result-title">Kết quả</div>
+          <div class="result-value" id="addResult">—</div>
+        </div>
+      </div>
+
+      <div class="section" id="multiply">
+        <label class="label" for="mulA">Số nhị phân thứ nhất</label>
+        <input id="mulA" inputmode="numeric" autocomplete="off" placeholder="101">
+        <div class="operator">×</div>
+        <label class="label" for="mulB">Số nhị phân thứ hai</label>
+        <input id="mulB" inputmode="numeric" autocomplete="off" placeholder="11">
+        <div class="actions">
+          <button class="action" onclick="calculate('multiply')">Tính tích</button>
+          <button class="action secondary" onclick="clearCalc('multiply')">Xóa</button>
+        </div>
+        <div class="error" id="mulError"></div>
+        <div class="result">
+          <div class="result-title">Kết quả</div>
+          <div class="result-value" id="mulResult">—</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="history">
+      <div class="history-head">
+        <div class="history-title">Lịch sử tính toán</div>
+        <button class="clear" onclick="clearHistory()">Xóa lịch sử</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="history-item empty">Chưa có phép tính nào.</div>
+      </div>
+    </section>
+
+    <footer>Ứng dụng số nhị phân • Giao diện tối ưu cho điện thoại</footer>
+  </main>
+
+  <script>
+    const historyData = [];
+
+    function isBinary(value) {
+      return /^[01]+$/.test(value);
+    }
+
+    function isDecimal(value) {
+      return /^\d+$/.test(value);
+    }
+
+    function parseBinary(value) {
+      return BigInt("0b" + value);
+    }
+
+    function showError(id, message) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.style.display = message ? "block" : "none";
+    }
+
+    function addHistory(text) {
+      historyData.unshift(text);
+      if (historyData.length > 8) historyData.pop();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const list = document.getElementById("historyList");
+      if (!historyData.length) {
+        list.innerHTML = '<div class="history-item empty">Chưa có phép tính nào.</div>';
+        return;
+      }
+      list.innerHTML = historyData.map(item =>
+        '<div class="history-item">' + escapeHtml(item) + '</div>'
+      ).join("");
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, c => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+      }[c]));
+    }
+
+    function convertBinToDec() {
+      const input = document.getElementById("binInput").value.trim();
+      showError("binError", "");
+      if (!input || !isBinary(input)) {
+        showError("binError", "Vui lòng nhập đúng số nhị phân, chỉ gồm 0 và 1.");
+        return;
+      }
+      const result = parseBinary(input).toString(10);
+      document.getElementById("binResult").textContent = result;
+      addHistory(input + "₂ = " + result + "₁₀");
+    }
+
+    function convertDecToBin() {
+      const input = document.getElementById("decInput").value.trim();
+      showError("decError", "");
+      if (!input || !isDecimal(input)) {
+        showError("decError", "Vui lòng nhập số nguyên không âm.");
+        return;
+      }
+      const result = BigInt(input).toString(2);
+      document.getElementById("decResult").textContent = result;
+      addHistory(input + "₁₀ = " + result + "₂");
+    }
+
+    function calculate(type) {
+      const prefix = type === "add" ? "add" : "mul";
+      const a = document.getElementById(prefix + "A").value.trim();
+      const b = document.getElementById(prefix + "B").value.trim();
+      const errorId = prefix + "Error";
+      const resultId = prefix + "Result";
+      showError(errorId, "");
+
+      if (!a || !b || !isBinary(a) || !isBinary(b)) {
+        showError(errorId, "Vui lòng nhập hai số nhị phân hợp lệ (chỉ gồm 0 và 1).");
+        return;
+      }
+
+      const x = parseBinary(a);
+      const y = parseBinary(b);
+      const result = type === "add" ? x + y : x * y;
+      const binaryResult = result.toString(2);
+
+      document.getElementById(resultId).textContent = binaryResult;
+      addHistory(a + (type === "add" ? " + " : " × ") + b + " = " + binaryResult + "₂");
+    }
+
+    function clearSection(inputId, resultId, errorId) {
+      document.getElementById(inputId).value = "";
+      document.getElementById(resultId).textContent = "—";
+      showError(errorId, "");
+      document.getElementById(inputId).focus();
+    }
+
+    function clearCalc(type) {
+      const prefix = type === "add" ? "add" : "mul";
+      document.getElementById(prefix + "A").value = "";
+      document.getElementById(prefix + "B").value = "";
+      document.getElementById(prefix + "Result").textContent = "—";
+      showError(prefix + "Error", "");
+      document.getElementById(prefix + "A").focus();
+    }
+
+    function clearHistory() {
+      historyData.length = 0;
+      renderHistory();
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.tab).classList.add("active");
+      });
+    });
+
+    document.querySelectorAll("input").forEach(input => {
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          const section = input.closest(".section").id;
+          if (section === "bin-dec") convertBinToDec();
+          if (section === "dec-bin") convertDecToBin();
+          if (section === "add") calculate("add");
+          if (section === "multiply") calculate("multiply");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
